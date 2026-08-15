@@ -1,0 +1,13 @@
+# Node.js
+node_modules/
+npm-debug.log*
+
+# アプリのデータ（本番DB: 初回起動時に自動作成）
+data.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ログ
+*.log

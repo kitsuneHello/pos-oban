@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POSレジ | 文化祭 模擬店</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header id="app-header" class="hidden">
+    <div class="header-brand">
+      <span class="brand-icon"><i class="fa-solid fa-ice-cream"></i></span>
+      <div class="brand-text">
+        <div class="brand-name" id="brand-name">文化祭 模擬店レジ</div>
+        <div class="sync-status" id="sync-status">
+          <i class="fa-solid fa-circle" id="sync-dot"></i><span id="sync-text">接続中</span>
+        </div>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="tab" data-view="pos"><i class="fa-solid fa-cash-register"></i> レジ</button>
+      <button class="tab" data-view="kds">
+        <i class="fa-solid fa-fire-burner"></i> キッチン
+        <span class="badge hidden" id="kds-badge">0</span>
+      </button>
+      <button class="tab" data-view="callout"><i class="fa-solid fa-bullhorn"></i> 呼び出し</button>
+      <button class="tab" data-view="inventory"><i class="fa-solid fa-boxes-stacked"></i> 在庫</button>
+      <button class="tab" data-view="dashboard"><i class="fa-solid fa-chart-column"></i> ダッシュボード</button>
+    </nav>
+    <button class="logout-btn" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> ログアウト</button>
+    <button class="tabs-toggle" id="tabs-toggle" title="バーを隠す">
+      <i class="fa-solid fa-angles-up"></i>
+    </button>
+  </header>
+
+  <button class="header-restore hidden" id="header-restore" title="バーを表示">
+    <i class="fa-solid fa-angles-down"></i>
+  </button>
+
+  <main id="app-main" class="hidden"></main>
+
+  <div id="toast-container" aria-live="polite"></div>
+
+  <div id="auth-overlay" class="modal-overlay">
+    <div class="modal auth-modal">
+      <div class="auth-icon"><i class="fa-solid fa-lock"></i></div>
+      <h1 class="auth-title">POSレジ</h1>
+      <p class="auth-desc">パスコードを入力して開始してください</p>
+      <form id="auth-form">
+        <input id="auth-passcode" type="password" inputmode="numeric" autocomplete="off"
+               placeholder="パスコード" maxlength="8" required>
+        <p class="auth-error hidden" id="auth-error"></p>
+        <button type="submit" class="btn btn-primary btn-block">入室する</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>
