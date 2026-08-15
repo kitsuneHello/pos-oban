@@ -1,21 +1,35 @@
-const PASSCODE_KEY = 'pos_passcode';
+const USERNAME_KEY = 'pos_username';
+const PASSWORD_KEY = 'pos_password';
 
-export function getPasscode() {
-  return sessionStorage.getItem(PASSCODE_KEY) || '';
+export function getUsername() {
+  return sessionStorage.getItem(USERNAME_KEY) || '';
 }
 
-export function setPasscode(code) {
-  sessionStorage.setItem(PASSCODE_KEY, code);
+export function setUsername(name) {
+  sessionStorage.setItem(USERNAME_KEY, name);
 }
 
-export function clearPasscode() {
-  sessionStorage.removeItem(PASSCODE_KEY);
+export function getPassword() {
+  return sessionStorage.getItem(PASSWORD_KEY) || '';
+}
+
+export function setPassword(pw) {
+  sessionStorage.setItem(PASSWORD_KEY, pw);
+}
+
+export function clearAuth() {
+  sessionStorage.removeItem(USERNAME_KEY);
+  sessionStorage.removeItem(PASSWORD_KEY);
+}
+
+export function isLoggedIn() {
+  return !!(getUsername() && getPassword());
 }
 
 export async function api(path, options = {}) {
   const opts = {
     method: options.method || 'GET',
-    headers: { 'x-passcode': getPasscode(), ...(options.headers || {}) },
+    headers: { 'x-username': getUsername(), 'x-password': getPassword(), ...(options.headers || {}) },
   };
   if (options.body !== undefined) {
     opts.headers['Content-Type'] = 'application/json';
@@ -41,18 +55,24 @@ export function wsConnect(onState) {
   function connect() {
     ws = new WebSocket(`${proto}://${location.host}`);
     ws.onopen = () => {
-      attempts = 0;
-      window.dispatchEvent(new CustomEvent('pos:sync', { detail: true }));
+      ws.send(JSON.stringify({ type: 'auth', username: getUsername(), password: getPassword() }));
     };
     ws.onmessage = (ev) => {
       try {
         const msg = JSON.parse(ev.data);
-        if (msg.type === 'state') onState(msg.data);
+        if (msg.type === 'state') {
+          window.dispatchEvent(new CustomEvent('pos:sync', { detail: true }));
+          onState(msg.data);
+        }
       } catch { /* ignore */ }
     };
-    ws.onclose = () => {
+    ws.onclose = (ev) => {
       window.dispatchEvent(new CustomEvent('pos:sync', { detail: false }));
       if (closed) return;
+      if (ev.code === 4001) {
+        window.dispatchEvent(new CustomEvent('pos:unauthorized'));
+        return;
+      }
       attempts += 1;
       clearTimeout(timer);
       timer = setTimeout(connect, Math.min(1000 * 2 ** attempts, 15000));

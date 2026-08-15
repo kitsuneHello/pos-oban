@@ -57,8 +57,8 @@ export function showToast(msg, type = 'info') {
 }
 
 export async function downloadCsv() {
-  const { getPasscode } = await import('./api.js');
-  const res = await fetch('/api/export/csv', { headers: { 'x-passcode': getPasscode() } });
+  const { getUsername, getPassword } = await import('./api.js');
+  const res = await fetch('/api/export/csv', { headers: { 'x-username': getUsername(), 'x-password': getPassword() } });
   if (!res.ok) throw new Error('CSVの取得に失敗しました');
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);

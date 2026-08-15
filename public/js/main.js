@@ -1,4 +1,4 @@
-import { api, wsConnect, getPasscode, setPasscode, clearPasscode } from './api.js';
+import { api, wsConnect, getUsername, setUsername, getPassword, setPassword, clearAuth } from './api.js';
 import { showToast } from './util.js';
 import { PosView } from './views/pos.js';
 import { KdsView } from './views/kds.js';
@@ -59,9 +59,10 @@ function showAuthModal() {
   document.getElementById('auth-overlay').classList.remove('hidden');
   document.getElementById('app-header').classList.add('hidden');
   document.getElementById('app-main').classList.add('hidden');
-  document.getElementById('auth-passcode').value = '';
+  document.getElementById('auth-username').value = '';
+  document.getElementById('auth-password').value = '';
   document.getElementById('auth-error').classList.add('hidden');
-  setTimeout(() => document.getElementById('auth-passcode').focus(), 50);
+  setTimeout(() => document.getElementById('auth-username').focus(), 50);
 }
 
 function enterApp() {
@@ -75,7 +76,7 @@ function enterApp() {
 }
 
 function logout() {
-  clearPasscode();
+  clearAuth();
   if (ws) { ws.close(); ws = null; }
   if (timer) { clearInterval(timer); timer = null; }
   showAuthModal();
@@ -102,15 +103,17 @@ async function boot() {
 
   document.getElementById('auth-form').addEventListener('submit', async (ev) => {
     ev.preventDefault();
-    const input = document.getElementById('auth-passcode');
+    const usernameEl = document.getElementById('auth-username');
+    const passwordEl = document.getElementById('auth-password');
     const errorEl = document.getElementById('auth-error');
     try {
-      await api('/api/auth', { method: 'POST', body: { passcode: input.value.trim() } });
-      setPasscode(input.value.trim());
+      await api('/api/auth', { method: 'POST', body: { username: usernameEl.value.trim(), password: passwordEl.value } });
+      setUsername(usernameEl.value.trim());
+      setPassword(passwordEl.value);
       enterApp();
       connectWs();
     } catch (e) {
-      errorEl.textContent = 'パスコードが正しくありません。';
+      errorEl.textContent = 'ユーザー名またはパスワードが正しくありません。';
       errorEl.classList.remove('hidden');
     }
   });
@@ -128,7 +131,7 @@ async function boot() {
     showToast('セッションが無効になりました。再入場してください。', 'error');
   });
 
-  if (getPasscode()) {
+  if (getUsername() && getPassword()) {
     try {
       applyState(await api('/api/state'));
       enterApp();

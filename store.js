@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DATA_FILE = path.join(__dirname, 'data.json');
+const USERS_FILE = path.join(__dirname, 'users.txt');
 
 const STATUS = Object.freeze({
   WAITING: 'WAITING',
@@ -100,8 +101,31 @@ function getState() {
   return data;
 }
 
-function verifyPasscode(passcode) {
-  return String(passcode) === String(data.passcode);
+function loadUsers() {
+  try {
+    if (!fs.existsSync(USERS_FILE)) return [];
+    const lines = fs.readFileSync(USERS_FILE, 'utf8').split(/\r?\n/);
+    return lines.map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
+  } catch (err) {
+    console.error('users.txt の読み込みに失敗:', err.message);
+    return [];
+  }
+}
+
+function verifyLogin(username, password) {
+  const name = String(username || '').trim();
+  if (!name) return false;
+  if (!loadUsers().includes(name)) return false;
+  return String(password) === String(data.passcode);
+}
+
+function addUser(username) {
+  const name = String(username || '').trim();
+  if (!name) return { ok: false, error: 'ユーザー名を入力してください。' };
+  const users = loadUsers();
+  if (users.includes(name)) return { ok: false, error: 'このユーザー名はすでに登録されています。' };
+  fs.appendFileSync(USERS_FILE, name + '\n', 'utf8');
+  return { ok: true, username: name };
 }
 
 function nextId(prefix, list, key = 'id') {
@@ -387,7 +411,8 @@ module.exports = {
   persist,
   resetData,
   getState,
-  verifyPasscode,
+  verifyLogin,
+  addUser,
   createOrder,
   setOrderStatus,
   undoOrderStatus,

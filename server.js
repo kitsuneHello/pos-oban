@@ -15,9 +15,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 function requireAuth(req, res, next) {
   if (req.originalUrl === '/api/auth') return next();
-  const passcode = req.headers['x-passcode'];
-  if (!store.verifyPasscode(passcode)) {
-    return res.status(401).json({ ok: false, error: '認証が必要です。パスコードを入力してください。' });
+  const username = req.headers['x-username'];
+  const password = req.headers['x-password'];
+  if (!store.verifyLogin(username, password)) {
+    return res.status(401).json({ ok: false, error: '認証が必要です。再入場してください。' });
   }
   next();
 }
@@ -32,7 +33,7 @@ function publicState() {
 function broadcast(snapshot) {
   const payload = JSON.stringify({ type: 'state', data: snapshot });
   for (const client of wss.clients) {
-    if (client.readyState === 1) client.send(payload);
+    if (client.authenticated && client.readyState === 1) client.send(payload);
   }
 }
 
@@ -47,11 +48,11 @@ function handleResult(res, result) {
 }
 
 app.post('/api/auth', (req, res) => {
-  const { passcode } = req.body || {};
-  if (store.verifyPasscode(passcode)) {
-    return res.json({ ok: true });
+  const { username, password } = req.body || {};
+  if (store.verifyLogin(username, password)) {
+    return res.json({ ok: true, username: String(username).trim() });
   }
-  return res.status(401).json({ ok: false, error: 'パスコードが正しくありません。' });
+  return res.status(401).json({ ok: false, error: 'ユーザー名またはパスワードが正しくありません。' });
 });
 
 app.get('/api/state', (req, res) => {
@@ -114,6 +115,11 @@ app.post('/api/orgname', (req, res) => {
   handleResult(res, store.setOrgName(name));
 });
 
+app.post('/api/users', (req, res) => {
+  const { username } = req.body || {};
+  handleResult(res, store.addUser(username));
+});
+
 app.post('/api/toppings', (req, res) => {
   const { name, price, stock, is_unlimited } = req.body || {};
   handleResult(res, store.addTopping({ name, price, stock, is_unlimited }));
@@ -169,7 +175,20 @@ const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
 wss.on('connection', (ws) => {
-  ws.send(JSON.stringify({ type: 'state', data: publicState() }));
+  ws.authenticated = false;
+  ws.on('message', (raw) => {
+    try {
+      const msg = JSON.parse(raw.toString());
+      if (msg.type === 'auth') {
+        if (store.verifyLogin(msg.username, msg.password)) {
+          ws.authenticated = true;
+          ws.send(JSON.stringify({ type: 'state', data: publicState() }));
+        } else {
+          ws.close(4001, 'unauthorized');
+        }
+      }
+    } catch { /* ignore */ }
+  });
 });
 
 server.listen(PORT, () => {

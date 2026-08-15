@@ -6,11 +6,11 @@ error messages are in **Japanese**; keep new strings Japanese.
 ## Run
 - `npm start` (== `npm run dev` == `node server.js`). No build, no tests, no lint. Deps: express, ws only.
 - Server listens on all interfaces on `PORT` (default 3000) and serves `public/` + WS on the same port — multi-device sync is the point.
-- Passcode: `PASSCODE` env var overrides `data.json`'s `passcode` at startup (`store.load()` applies it last). `data.json` is gitignored.
+- Passcode: `PASSCODE` env var overrides `data.json`'s `passcode` at startup (`store.load()` applies it last). `data.json` is gitignored. Login is **username + common password**: the username must be in `users.txt` (one per line, `#` lines ignored, read fresh on every auth so edits apply without restart), and the password must match `data.passcode`. Usernames can be appended via `POST /api/users` or by editing `users.txt` directly.
 
 ## Architecture
 - `store.js` — all business logic and persistence. After every successful mutation it broadcasts the full `{type:'state', data:{products,toppings,orders,orgName}}` snapshot over WS.
-- `server.js` — Express routes + WebSocket broadcast. All `/api/*` routes except `/api/auth` require the `x-passcode` header (default passcode `1234`); 401 triggers client logout. Product CRUD (`POST /api/products`, `.../:id/edit`, `.../:id/delete`) and org name (`POST /api/orgname`) live here too; header brand name is driven by `state.orgName`.
+- `server.js` — Express routes + WebSocket broadcast. All `/api/*` routes except `/api/auth` require the `x-username` + `x-password` headers; 401 triggers client logout. Product CRUD (`POST /api/products`, `.../:id/edit`, `.../:id/delete`) and org name (`POST /api/orgname`) live here too; header brand name is driven by `state.orgName`. WS clients must send `{type:'auth', username, password}` as their first frame; the server only broadcasts to authenticated sockets (close code 4001 on bad auth).
 - `public/` — vanilla JS ES modules (no framework, no bundler). Views live in `public/js/views/`, each exporting `{render(main, state)}` that sets `main.innerHTML` then wires `[data-action]` handlers. Register new views in `main.js` `views` map + add a tab in `index.html`. Shared helpers in `util.js`, auth/WS client in `api.js`.
 - `REQUIREMENTS.md` is the authoritative Japanese spec — read it before changing behavior.
 
