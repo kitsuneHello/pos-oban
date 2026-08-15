@@ -24,7 +24,7 @@
 
 ```bash
 # 1. リポジトリを取得
-git clone <リポジトリのURL>
+git clone https://github.com/kitsuneHello/pos-oban.git
 cd pos-oban
 
 # 2. 依存パッケージをインストール
