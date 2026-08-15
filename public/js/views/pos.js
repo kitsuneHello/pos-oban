@@ -60,7 +60,7 @@ export const PosView = {
               ${cart.map((l, idx) => `
                 <div class="cart-item">
                   <div class="cart-item-head">
-                    <span class="cart-item-name">${escapeHtml(l.name)}${l.quantity > 1 ? ` <span class="qty">× ${l.quantity}</span>` : ''}</span>
+                    <span class="cart-item-name">${escapeHtml(l.name)}</span>
                     <span class="cart-item-actions">
                       <button class="cart-item-remove" data-action="edit-line" data-idx="${idx}" type="button"
                               title="編集"><i class="fa-solid fa-pen"></i></button>
@@ -76,6 +76,9 @@ export const PosView = {
                         <span class="cart-top-price">${formatYen(t.price * t.quantity)}</span>
                       </div>
                     `).join('')}
+                  </div>
+                  <div class="cart-item-foot">
+                    <span class="cart-item-qty">× ${formatNumber(l.quantity)}セット</span>
                   </div>
                   <div class="cart-totals">
                     <div class="row total"><span>小計</span><span>${formatYen((l.unit_price + l.toppings.reduce((x, t) => x + t.price * t.quantity, 0)) * l.quantity)}</span></div>
