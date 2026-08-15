@@ -85,7 +85,9 @@ function load() {
 }
 
 function persist() {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
+  const tmp = DATA_FILE + '.tmp';
+  fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf8');
+  fs.renameSync(tmp, DATA_FILE);
 }
 
 function resetData() {

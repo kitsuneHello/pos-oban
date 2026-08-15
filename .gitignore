@@ -4,6 +4,7 @@ npm-debug.log*
 
 # アプリのデータ（本番DB: 初回起動時に自動作成）
 data.json
+data.json.tmp
 
 # OS
 .DS_Store

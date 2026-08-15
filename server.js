@@ -176,6 +176,8 @@ const wss = new WebSocketServer({ server });
 
 wss.on('connection', (ws) => {
   ws.authenticated = false;
+  ws.isAlive = true;
+  ws.on('pong', () => { ws.isAlive = true; });
   ws.on('message', (raw) => {
     try {
       const msg = JSON.parse(raw.toString());
@@ -190,6 +192,20 @@ wss.on('connection', (ws) => {
     } catch { /* ignore */ }
   });
 });
+
+const keepAliveInterval = setInterval(() => {
+  for (const client of wss.clients) {
+    if (client.readyState !== 1) continue;
+    if (!client.isAlive) {
+      client.terminate();
+      continue;
+    }
+    client.isAlive = false;
+    client.ping();
+  }
+}, 30000);
+
+wss.on('close', () => clearInterval(keepAliveInterval));
 
 server.listen(PORT, () => {
   console.log(`POSレジアプリ起動: http://localhost:${PORT}`);
