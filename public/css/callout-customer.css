@@ -1,0 +1,92 @@
+/* ---------- お客様向け 待ち時間掲示板 ---------- */
+body.customer-page {
+  display: block;
+  height: auto;
+  min-height: 100vh;
+  overflow-y: auto;
+  background: var(--bg);
+}
+
+.customer-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--header);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+}
+
+.customer-brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.customer-brand-icon {
+  width: 42px; height: 42px;
+  flex: 0 0 auto;
+  display: grid; place-items: center;
+  background: var(--primary);
+  border-radius: 12px;
+  font-size: 125%;
+}
+.customer-title {
+  font-size: 125%;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.customer-conn {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 87.5%;
+  color: #cbd5e1;
+}
+.customer-conn #conn-dot { font-size: 62.5%; }
+.customer-conn #conn-dot.online { color: var(--green); }
+.customer-conn #conn-dot.offline { color: var(--amber); }
+
+.customer-main { padding: 14px 14px 20px; }
+.customer-note {
+  text-align: center;
+  color: var(--muted);
+  font-size: 93.75%;
+  margin-bottom: 14px;
+}
+
+.customer-columns {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.customer-columns .callout-column {
+  flex: none;
+  width: 100%;
+  padding: 12px;
+}
+.customer-columns .callout-column > h2 { font-size: 125%; margin-bottom: 10px; }
+.customer-columns .nums {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto;
+  gap: 10px;
+}
+.customer-columns .num-card { border-radius: 14px; padding: 10px 8px; }
+.customer-columns .num-card .n { font-size: 190%; }
+.customer-columns .callout-empty { flex: none; font-size: 93.75%; }
+
+.customer-footer {
+  padding: 12px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 81.25%;
+}
+
+@media (min-width: 900px) {
+  .customer-columns { flex-direction: row; }
+  .customer-columns .nums { grid-template-columns: repeat(4, 1fr); }
+  .customer-columns .num-card .n { font-size: 240%; }
+}

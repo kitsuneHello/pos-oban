@@ -30,6 +30,8 @@ function publicState() {
   return { products, toppings, orders, orgName };
 }
 
+const sseClients = new Set();
+
 function broadcast(snapshot) {
   const payload = JSON.stringify({ type: 'state', data: snapshot });
   for (const client of wss.clients) {
@@ -37,8 +39,20 @@ function broadcast(snapshot) {
   }
 }
 
+function emitBoard() {
+  const payload = `data: ${JSON.stringify(store.getCalloutState())}\n\n`;
+  for (const res of sseClients) {
+    try {
+      res.write(payload);
+    } catch {
+      sseClients.delete(res);
+    }
+  }
+}
+
 function emit() {
   broadcast(publicState());
+  emitBoard();
 }
 
 function handleResult(res, result) {
@@ -57,6 +71,22 @@ app.post('/api/auth', (req, res) => {
 
 app.get('/api/state', (req, res) => {
   res.json(publicState());
+});
+
+app.get('/board/state', (req, res) => {
+  res.json(store.getCalloutState());
+});
+
+app.get('/board/stream', (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+  });
+  res.write('retry: 5000\n\n');
+  res.write(`data: ${JSON.stringify(store.getCalloutState())}\n\n`);
+  sseClients.add(res);
+  req.on('close', () => sseClients.delete(res));
 });
 
 app.post('/api/orders', (req, res) => {
@@ -206,6 +236,18 @@ const keepAliveInterval = setInterval(() => {
 }, 30000);
 
 wss.on('close', () => clearInterval(keepAliveInterval));
+
+const sseHeartbeat = setInterval(() => {
+  for (const res of sseClients) {
+    try {
+      res.write(': ping\n\n');
+    } catch {
+      sseClients.delete(res);
+    }
+  }
+}, 60000);
+
+server.on('close', () => clearInterval(sseHeartbeat));
 
 server.listen(PORT, () => {
   console.log(`POSレジアプリ起動: http://localhost:${PORT}`);
