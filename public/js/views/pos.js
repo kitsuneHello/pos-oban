@@ -115,7 +115,7 @@ export const PosView = {
             <button class="btn calc-key" data-action="calc-digit" data-val="00" type="button">00</button>
             <button class="btn calc-key calc-key-wide" data-action="calc-digit" data-val="0" type="button">0</button>
             <button class="btn calc-key calc-key-eq calc-key-wide" data-action="deposit-quick" data-val="exact" type="button"
-                    title="合計と同額を入力">＝</button>
+                    title="合計と同額を入力">ぴったり</button>
           </div>
 
           <div class="change-row ${deposit >= subtotal() ? 'change' : 'warn'}">
