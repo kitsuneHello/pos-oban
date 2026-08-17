@@ -400,18 +400,6 @@ function getOrdersForExport() {
     .sort((a, b) => b.created_at.localeCompare(a.created_at));
 }
 
-function getCalloutState() {
-  const active = data.orders
-    .filter((o) => o.status === 'READY' || o.status === 'PREPARING')
-    .slice()
-    .sort((a, b) => b.created_at.localeCompare(a.created_at));
-  return {
-    orgName: data.orgName,
-    ready: active.filter((o) => o.status === 'READY').map((o) => o.order_number),
-    cooking: active.filter((o) => o.status === 'PREPARING').map((o) => o.order_number),
-  };
-}
-
 function getRecentOrders(limit = 50) {
   return data.orders
     .slice()
@@ -443,6 +431,5 @@ module.exports = {
   setToppingSoldOut,
   setOrgName,
   getOrdersForExport,
-  getCalloutState,
   getRecentOrders,
 };
