@@ -95,13 +95,7 @@ export const PosView = {
 
         <div class="payment-panel card">
           <div class="deposit-label"><i class="fa-solid fa-hand-holding-dollar"></i> 預かり金額</div>
-          <div class="quick-btns">
-            <button class="btn btn-ghost" data-action="deposit-add" data-val="10" type="button">＋￥10</button>
-            <button class="btn btn-ghost" data-action="deposit-add" data-val="50" type="button">＋￥50</button>
-            <button class="btn btn-ghost" data-action="deposit-add" data-val="100" type="button">＋￥100</button>
-            <button class="btn btn-ghost" data-action="deposit-add" data-val="500" type="button">＋￥500</button>
-            <button class="btn btn-ghost" data-action="deposit-add" data-val="1000" type="button">＋￥1000</button>
-          </div>
+
           <input type="number" class="deposit-input" id="deposit-input" min="0" step="1"
                  placeholder="預かり金額を入力" value="${deposit || ''}">
 
@@ -148,9 +142,6 @@ export const PosView = {
         else if (action === 'remove-line') { cart.splice(Number(idx), 1); PosView.render(main, state); }
         else if (action === 'deposit-quick') {
           deposit = el.dataset.val === 'exact' ? subtotal() : Number(el.dataset.val);
-          PosView.render(main, state);
-        } else if (action === 'deposit-add') {
-          deposit += Number(el.dataset.val);
           PosView.render(main, state);
         } else if (action === 'calc-digit') calcDigit(el.dataset.val);
         else if (action === 'calc-back') calcBack();
