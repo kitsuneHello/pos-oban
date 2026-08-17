@@ -42,6 +42,8 @@ function updateKdsBadge() {
 }
 
 function renderActive() {
+  const el = document.activeElement;
+  if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') && el.closest('#app-main')) return;
   const view = views[activeView];
   const main = document.getElementById('app-main');
   if (!view || !main) return;
